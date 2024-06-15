@@ -2,7 +2,7 @@
 
 const { Server } = require("socket.io")
 const localURL = "http://localhost:3000"
-const clientURL = "https://proyecto-videojuego-sb.vercel.app/"
+const clientURL = "https://proyecto-videojuego-sb.vercel.app"
 const port = 5000
 const io = new Server({
 	cors: {
