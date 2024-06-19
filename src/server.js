@@ -1,6 +1,6 @@
 "use strict"
 
-const { Server } = require("socket.io")
+const { Server, Socket } = require("socket.io")
 const localURL = "http://localhost:3000"
 const clientURL = "https://proyecto-videojuego-sb.vercel.app"
 const port = 5000
@@ -12,6 +12,7 @@ const io = new Server({
 
 let players = []
 let enemies = []
+let ivys = []
 
 io.on('connection', (socket) => {
 	console.log(
@@ -23,12 +24,16 @@ io.on('connection', (socket) => {
 	)
 
 	socket.on('player-connected', () => {
+		const sizePlayers = players.length
+		const haveLeviosaOtherPlayer = players.find(player => player.haveLeviosa === true)
+
 		players.push({
 			id: socket.id,
 			leader: players.length === 0 ? true : false,
 			position: null,
 			rotation: null,
 			animation: "Idle",
+			haveLeviosa: sizePlayers === 0 ? true : haveLeviosaOtherPlayer ? false : true
 		})
 		console.log(
 			'Player entered game with ID' +
@@ -87,6 +92,14 @@ io.on('connection', (socket) => {
 		}
 	})
 
+	socket.on('hit-leviosa', () => {
+		const player = players.find(player => player.id !== socket.id)
+		console.log(player)
+		if (player) {
+			socket.broadcast.emit('updates-values-leviosa', player)	
+		}
+	})
+
 	socket.on('player-disconnected', () => {
 		players = players.filter(player => player.id !== socket.id)
 		if (players.length !== 0) {
@@ -123,6 +136,31 @@ io.on('connection', (socket) => {
 			io.engine.clientsCount +
 			' players connected'
 		)
+	})
+
+	socket.on('create-ivys', (initialsIvy) => {
+		const player = players.find(player => player.id === socket.id)
+		if (player.leader) {
+			ivys = initialsIvy
+		}
+	})
+
+	socket.on('values-ivys', () => {
+		socket.emit('updates-values-ivys', ivys)
+	})
+
+	socket.on('hit-incendio-in-ivy', (auxIvy) => {
+		const ivy = ivys.find(ivy => ivy.id === auxIvy.id)
+		if (ivy) {
+			io.emit('fire-ivy', ivy)
+		}
+	})
+
+	socket.on('burn-ivy', (auxIvy) => {
+		const ivy = ivys.find(ivy => ivy.id === auxIvy.id)
+		if (ivy) {
+			ivy.isBurned = true
+		}
 	})
 })
 
