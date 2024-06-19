@@ -13,6 +13,8 @@ const io = new Server({
 let players = []
 let enemies = []
 let ivys = []
+let keys = []
+let boxes = []
 
 io.on('connection', (socket) => {
 	console.log(
@@ -94,7 +96,6 @@ io.on('connection', (socket) => {
 
 	socket.on('hit-leviosa', () => {
 		const player = players.find(player => player.id !== socket.id)
-		console.log(player)
 		if (player) {
 			socket.broadcast.emit('updates-values-leviosa', player)	
 		}
@@ -119,25 +120,7 @@ io.on('connection', (socket) => {
 		)
 	})
 
-	socket.on('disconnect', () => {
-		players = players.filter(player => player.id !== socket.id)
-		if (players.length !== 0) {
-			const leader = players.find(player => player.leader === true)
-			if (!leader) {
-				const player = players.find(() => true)
-				player.leader = true
-				io.emit('status-leader', players)
-			}
-		}
-		console.log(
-			'Player disconnected with ID' +
-			socket.id +
-			'. There are ' +
-			io.engine.clientsCount +
-			' players connected'
-		)
-	})
-
+	
 	socket.on('create-ivys', (initialsIvy) => {
 		const player = players.find(player => player.id === socket.id)
 		if (player.leader) {
@@ -161,6 +144,70 @@ io.on('connection', (socket) => {
 		if (ivy) {
 			ivy.isBurned = true
 		}
+	})
+
+	socket.on('create-keys', (initialKeys) => {
+		const player = players.find(player => player.id === socket.id)
+		if (player.leader) {
+			keys = initialKeys
+			socket.emit('updates-values-keys', keys)
+		}
+	})
+
+	socket.on('values-keys', () => {
+		socket.emit('updates-values-keys', keys)
+	})
+
+	socket.on('user-collect-key', (auxKey) => {
+		const key = keys.find(key => key.id === auxKey.id)
+		if (key) {
+			key.isCollected = true
+			io.emit('collect-key', key)
+		}
+	})
+
+	socket.on('create-boxes', () => {
+		boxes.push(
+			{
+				id: 1,
+				position: null,
+			},
+			{
+				id: 2,
+				position: null,
+			},
+			{
+				id: 3,
+				position: null,
+			}
+		)
+	})
+
+	socket.on('moving-box', (auxBox) => {
+		const box = boxes.find(box => box.id === auxBox.id)
+		if (box) {
+			box.position = auxBox.position
+			socket.broadcast.emit('updates-values-box', box)
+		}
+	})
+
+	socket.on('disconnect', () => {
+		players = players.filter(player => player.id !== socket.id)
+		if (players.length !== 0) {
+			const leader = players.find(player => player.leader === true)
+			if (!leader) {
+				const player = players.find(() => true)
+				player.leader = true
+				io.emit('status-leader', players)
+			}
+		}
+		console.log(
+			'Player disconnected with ID' +
+			socket.id +
+			'. There are ' +
+			io.engine.clientsCount +
+			' players connected'
+		)
 	})
 })
 
