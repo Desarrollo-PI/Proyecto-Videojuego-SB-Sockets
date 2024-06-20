@@ -61,6 +61,7 @@ io.on('connection', (socket) => {
 			if (valuesEnemy.position && valuesEnemy.rotation) {
 				enemy.position = valuesEnemy.position
 				enemy.rotation = valuesEnemy.rotation
+				enemy.life = valuesEnemy.life
 			}
 			socket.broadcast.emit('updates-values-enemy', enemy)
 		}
@@ -92,11 +93,22 @@ io.on('connection', (socket) => {
 		}
 	})
 
+	socket.on('hit-enemy', (values) => {
+		socket.broadcast.emit('enemy-damaged', values)
+	})
+
 	socket.on('hit-leviosa', () => {
 		const player = players.find(player => player.id !== socket.id)
 		console.log(player)
 		if (player) {
-			socket.broadcast.emit('updates-values-leviosa', player)	
+			socket.broadcast.emit('updates-values-leviosa', player)
+		}
+	})
+
+	socket.on('player-dead', () => {
+		const player = players.find(player => player.id !== socket.id)
+		if (player) {
+			socket.broadcast.emit('updates-player-dead', player)
 		}
 	})
 
