@@ -99,6 +99,22 @@ io.on('connection', (socket) => {
 		socket.broadcast.emit('enemy-damaged', values)
 	})
 
+	socket.on('death-enemy', (id) => {
+		const enemy = enemies.find(enemy => enemy.id === id)
+		if (enemy) {
+			enemy.dead = true
+			socket.broadcast.emit('enemy-death', enemy)
+		}
+	})
+
+	socket.on('enemies-alive', () => {
+		socket.emit('alive-enemies', enemies)
+	})
+
+	socket.on('enemy-change-color', (values) => {
+		socket.broadcast.emit('updates-enemy-color', values)
+	})
+
 	socket.on('hit-leviosa', () => {
 		const player = players.find(player => player.id !== socket.id)
 		if (player) {
