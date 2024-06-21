@@ -88,10 +88,10 @@ io.on('connection', (socket) => {
 		}
 	})
 
-	socket.on('hit-second-player', () => {
+	socket.on('hit-second-player', (damage) => {
 		const player = players.find(player => player.id !== socket.id)
 		if (player) {
-			socket.to(player.id).emit('hit-player')
+			socket.to(player.id).emit('hit-player', damage)
 		}
 	})
 
@@ -105,6 +105,10 @@ io.on('connection', (socket) => {
 			enemy.dead = true
 			socket.broadcast.emit('enemy-death', enemy)
 		}
+	})
+
+	socket.on('boss-dead', () => {
+		socket.broadcast.emit('dead-boss')
 	})
 
 	socket.on('enemies-alive', () => {
