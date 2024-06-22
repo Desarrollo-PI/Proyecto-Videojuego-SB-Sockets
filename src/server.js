@@ -15,6 +15,7 @@ let enemies = []
 let ivys = []
 let keys = []
 let boxes = []
+let blackWalls = []
 
 io.on('connection', (socket) => {
 	console.log(
@@ -198,6 +199,7 @@ io.on('connection', (socket) => {
 		}
 	})
 
+
 	socket.on('create-boxes', () => {
 		boxes.push(
 			{
@@ -210,6 +212,18 @@ io.on('connection', (socket) => {
 			},
 			{
 				id: 3,
+				position: null,
+			},
+			{
+				id: 4,
+				position: null,
+			},
+			{
+				id: 5,
+				position: null,
+			},
+			{
+				id: 6,
 				position: null,
 			}
 		)
