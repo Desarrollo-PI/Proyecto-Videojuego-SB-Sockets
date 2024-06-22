@@ -70,6 +70,10 @@ io.on('connection', (socket) => {
 		}
 	})
 
+	socket.on('change-enemy-animation', (values) => {
+		socket.broadcast.emit('updates-enemy-animation', values)
+	})
+
 	socket.on('moving-player', (valuesTransformPlayer) => {
 		const player = players.find(player => player.id === socket.id)
 		if (player) {
